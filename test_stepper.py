@@ -9,11 +9,14 @@ import time
 GPIOsetup()
 
 #test
-step_forward(motorSteps/2, speed6)
-time.sleep(0.5)
+#step_clockwise(motorSteps/2, speed6)
+#time.sleep(1.0)
 
-teeth_backward(pulleyTeeth, speed4)
-time.sleep(0.5)
+step_clockwise(tableSteps/2, speed6)
+time.sleep(1.0)
+
+#teeth_clockwise(pulleyTeeth, speed4)
+#time.sleep(1.0)
 
 
 

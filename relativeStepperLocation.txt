@@ -1,0 +1,4 @@
+This file contains relative location for the current session of the stepper motor
+
+0: Location = 0
+1: Location = 150

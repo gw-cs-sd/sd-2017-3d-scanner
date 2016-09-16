@@ -77,12 +77,12 @@ def pulse_motor(speed):
 def trackLocation(teeth, direction):
 	global moveCount
 	moveCount += 1
-	if direction == "forward":
+	if direction == "counter_clockwise":
 		global location
 		location += + teeth
 		location %= tableTeeth
 	else:
-		if direction == "backward":
+		if direction == "clockwise":
 			location -= teeth
 			location %= tableTeeth
 			if location < 0:
@@ -94,34 +94,34 @@ def trackLocation(teeth, direction):
 
 
 # movement by motor step
-# step_forward
-def step_forward(steps, speed):  
+# step_counter_clockwise
+def step_counter_clockwise(steps, speed):  
 	GPIO.output(dir_pin, 1)
 	for i in range(0, steps):
 		pulse_motor(speed)
-	trackLocation(steps/stepsPerTooth, "forward")
+	trackLocation(steps/stepsPerTooth, "counter_clockwise")
 
-# step_backward
-def step_backward(steps, speed): 
+# step_clockwise
+def step_clockwise(steps, speed): 
 	GPIO.output(dir_pin, 0)
 	for i in range(0, steps):
 		pulse_motor(speed)
-	trackLocation(steps/stepsPerTooth, "backward")
+	trackLocation(steps/stepsPerTooth, "clockwise")
 
 # movement by number of teeth
-# teeth_forward
-def teeth_forward(teeth, speed):
+# teeth_counter_clockwise
+def teeth_counter_clockwise(teeth, speed):
 	GPIO.output(dir_pin, 1)
 	for i in range(0, teeth * stepsPerTooth):
 		pulse_motor(speed)
-	trackLocation(teeth, "forward")
+	trackLocation(teeth, "counter_clockwise")
 
-# teeth_backward
-def teeth_backward(teeth, speed):
+# teeth_clockwise
+def teeth_clockwise(teeth, speed):
 	GPIO.output(dir_pin, 0)
 	for i in range(0, teeth * stepsPerTooth):
 		pulse_motor(speed)
-	trackLocation(teeth, "backward")
+	trackLocation(teeth, "clockwise")
 
 
 
@@ -135,5 +135,5 @@ print("   writing file: " + filename) #This file keeps track of the relative loc
 file1 = open(filename, 'w')
 file1.truncate()
 file1.write("This file contains relative location for the current session of the stepper motor\n\n")
-trackLocation(0, "forward")
+trackLocation(0, "counter_clockwise")
 
