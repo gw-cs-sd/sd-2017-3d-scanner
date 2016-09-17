@@ -1,3 +1,0 @@
-This file contains relative location for the current session of the stepper motor.
-Range: 0-300
-0: Location = 0
