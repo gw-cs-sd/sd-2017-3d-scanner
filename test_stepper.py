@@ -12,7 +12,9 @@ GPIOsetup()
 #step_clockwise(motorSteps/2, speed6)
 #time.sleep(1.0)
 
-step_clockwise(tableSteps/2, speed6)
+stepClockwise_accel(tableSteps/4, speed4)
+
+#step_clockwise(tableSteps, speed4)
 time.sleep(1.0)
 
 #teeth_clockwise(pulleyTeeth, speed4)
