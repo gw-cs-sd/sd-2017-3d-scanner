@@ -8,14 +8,27 @@ import time
 #setup pins 
 GPIOsetup()
 
-#test with no acceleration
-step_clockwise(motorSteps/2, speed4)
-time.sleep(1.0)
+# Test with no acceleration
+#step_clockwise(motorSteps/2, speed4)
+#time.sleep(1.0)
 
-#stepClockwise_accel(tableSteps/4, speed4) #this does not work yet
+#step_clockwise(tableSteps/4, speed4)
+#time.sleep(1.0)
 
-step_clockwise(tableSteps/4, speed4)
-time.sleep(1.0)
+
+
+
+
+#test with acceleration
+stepClockwise_withAccel(tableSteps/4+1, speed6) #this does not work yet
+
+
+
+
+
+
+
+
 
 #teeth_clockwise(pulleyTeeth, speed4)
 #time.sleep(1.0)
