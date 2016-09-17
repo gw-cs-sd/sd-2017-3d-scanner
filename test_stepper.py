@@ -14,7 +14,7 @@ time.sleep(1.0)
 
 #stepClockwise_accel(tableSteps/4, speed4) #this does not work yet
 
-step_clockwise(tableSteps, speed4)
+step_clockwise(tableSteps/4, speed4)
 time.sleep(1.0)
 
 #teeth_clockwise(pulleyTeeth, speed4)

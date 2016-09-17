@@ -11,19 +11,17 @@
 
 # TODO: attach a hall sensor to the arm and a fixed location on the table. Call an initialization() method that scans the entire the table. When the hall sensor is triggered, carefully stop the arm and slowly back up until the hall sensors are lined up again. This location will be fixed and will be tooth 0. 
 
+# acceleration() # TODO: write this method
+# initialize() # TODO: write this method 
+
 import RPi.GPIO as GPIO
 import time
 from sys import argv
 
-
-
-#initialize() #TODO: write this method 
-
-
 # global variables
-moveCount = -1 # tracker number for movements
-location = 0  # current location
-acceleration = 2 #magnitude of linear acceleration
+moveCount = -1 		# tracker number for movements
+location = 0  		# current location
+acceleration = 2 	# magnitude of linear acceleration
 
 # GPIO pin assignments
 pulse_pin = 23
@@ -42,6 +40,11 @@ def GPIOsetup():
 	GPIO.output(ena_pin, 0)
 	GPIO.output(pulse_pin, 0)
 	GPIO.output(dir_pin, 0)
+#==============\================================\===================
+#==============\================================\===================
+#==============\===ABOVE CODE IS RASPBERRY PI===\===================
+#==============\================================\===================
+#==============\================================\===================
 
 
 
@@ -53,61 +56,44 @@ stepsPerTooth = motorSteps / pulleyTeeth # = 10 steps
 tableSteps = tableTeeth * stepsPerTooth  # = 120000 steps
 motorCyclesPerArmCycle = 300/40          # = 7.5 motor cycles
 
-
+#===================================================================
 # Predefined SPEEDS
-
+#
+#		 steps/sec		 sec/step	sec/table
+speed1 = 50				# 0.020s	60s
+speed2 = 62.5			# 0.016s	48s
+speed3 = 1/0.012 #83.3~	# 0.012s	36s
+speed4 = 125			# 0.008s	24s
+speed5 = 250			# 0.004s	12s
+speed6 = 500			# 0.002s	6s
+#
 #	10 steps/tooth
 #	300 teeth/table rotation
 #	120000 steps/table rotation
 #	
-#	speed 1:	1 step = 0.02sec
-#				50 steps/sec
-#				table = 60s
-#	
-#	speed 2:	1 step = 0.016sec
-#				62.5 steps/sec
-#				table = 48s
-#	
-#	speed 3:	1 step = 0.012sec
-#				83.33~ steps/sec
-#				table = 36s
-#	
-#	speed 4:	1 step = 0.008sec ~~~~~MAX SPEED~~~~~
-#				125 steps/sec
-#				table = 24s
-#	
-#	speed 5:	1 step = 0.004sec ~~~~~DO NOT USE~~~~~
-#				250 steps/sec
-#				table = 12s
-#	
-#	speed 6:	1 step = 0.002sec ~~~~~DO NOT USE~~~~~
-#				500 steps/sec
-#				table = 6s
+#		1/t = s
+#		1/s = t	
 #
 #
 #	Helpful math:
-#	Speed #1: step = 0.02s, 1 rev motor/pulley (400 steps/40 teeth) = 8.0s, 1 rev arm (300 teeth) = 60s
-
-
-# amount of time (seconds) to take one step
-speed1 = 0.02
-speed2 = 0.016
-speed3 = 0.012
-speed4 = 0.008
-speed5 = 0.004
-speed6 = 0.002
+#		Speed #1: step = 0.02s, 1 rev motor/pulley (400 steps/40 teeth) = 8.0s, 1 rev arm (300 teeth) = 60s
 
 
 
-
+#=======================================================
+#======================METHODS==========================
+#=======================================================
 
 #this function is used for all step functions
 def pulse_motor(speed):
-	#1 step on motor takes "speed" time
+	# speed = steps/sec
+	# 1/speed = sec/step (what we need)
+	# 1 step on motor takes "speed" time
+	s = 1/speed
 	GPIO.output(pulse_pin, 1)
-	time.sleep(speed/2)
+	time.sleep(s/2)
 	GPIO.output(pulse_pin, 0)
-	time.sleep(speed/2)
+	time.sleep(s/2)
 
 # writes the relative tooth location of the arm with respect to the table gear
 def trackLocation(teeth, direction):
