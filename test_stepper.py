@@ -20,14 +20,21 @@ GPIOsetup()
 
 
 #test with acceleration
-stepClockwise_withAccel(tableSteps/4+1, speed6) #this does not work yet
+print "\nCase 1: Even steps. Constant Speed Achieved."
+stepClockwise_withAccel(tableSteps/2, speed6)
+time.sleep(1.0)
 
+print "\nCase 2: Even steps. Constant Speed NOT Achieved."
+stepClockwise_withAccel(tableSteps/4, speed6)
+time.sleep(1.0)
 
+print "\nCase 3: Odd steps. Constant Speed Achieved."
+stepClockwise_withAccel(tableSteps/2+1, speed6)
+time.sleep(1.0)
 
-
-
-
-
+print "\nCase 4: Odd steps. Constant Speed NOT Achieved."
+stepClockwise_withAccel(tableSteps/4-1, speed6)
+time.sleep(1.0)
 
 
 #teeth_clockwise(pulleyTeeth, speed4)

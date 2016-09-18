@@ -11,7 +11,6 @@
 
 # TODO: attach a hall sensor to the arm and a fixed location on the table. Call an initialization() method that scans the entire the table. When the hall sensor is triggered, carefully stop the arm and slowly back up until the hall sensors are lined up again. This location will be fixed and will be tooth 0. 
 
-# acceleration() # TODO: write this method
 # initialize() # TODO: write this method 
 
 import RPi.GPIO as GPIO
@@ -21,7 +20,7 @@ from sys import argv
 # global variables
 moveCount = -1 		# tracker number for movements
 location = 0  		# current location
-acceleration = 200 	# magnitude of linear acceleration
+acceleration = 300 	# magnitude of linear acceleration
 
 # GPIO pin assignments
 pulse_pin = 23
@@ -125,7 +124,7 @@ def trackLocation(teeth, direction):
 def step_counter_clockwise(steps, speed):  
 	if steps > 0:
 		GPIO.output(dir_pin, 1)
-		for i in range(0, steps):
+		for i in range(0, int(steps)):
 			pulse_motor(speed)
 		trackLocation(steps/stepsPerTooth, "counter_clockwise")
 	else:
@@ -141,7 +140,9 @@ def step_clockwise(steps, speed):
 	else:
 		print "ERROR in method: step_clockwise(): TYPE: invalid argument: negative distance:"
 
-
+#=======================================================================
+#=======================================================================
+#Get rid of these??
 
 # movement by number of TEETH
 # teeth_counter_clockwise
@@ -167,22 +168,24 @@ def teeth_clockwise(teeth, speed):
 
 
 
+#=======================================================================
+#=======================================================================
+#=======================================================================
+#=======================================================================
+#=======================================================================
 
 
 
-
-
-#distance covered through acceleration
+# Distance covered through acceleration
 def distAccel(speed):
 	distance = speed * speed / (2 * acceleration)
 	return distance
 
-#print "At acceleration = %d steps/s^2, %d steps are needed to reach speed = %s\n" % (acceleration, distAccel(speed1), speed1)
 
 
 
 
-# Acceleration-Decelaration V2 ----working!
+# Step Clockwise with Acceleration and Deceleration
 def stepClockwise_withAccel(steps, speed):
 	if(steps < 0):
 		print "ERROR: steps argument cannot be negative!"
@@ -191,35 +194,42 @@ def stepClockwise_withAccel(steps, speed):
 		print "ERROR: speed argument cannot be negative!"	
 		return
 
-	totalSteps = steps	
-	totalTime = 0.0
-	currSpeed = 0.0 # speed of step at stepCount & currTime	
+	
+	print "Begin move!"
+	print "---Acceleration: %d" % acceleration
+	print "---Speed:        %d" % speed
+	print "---Total steps:  %d" % steps
+	print "---Total acceleration step requirement:  %d steps" % distAccel(speed)
+	print "---Total deceleration step requirement:  %d steps" % distAccel(speed)
+	print "---Ratio (distAccel(speed)/total steps): %f" % (distAccel(speed) / steps)
+	
 
-	#=============================
-	accelDist = distAccel(speed)
-	noConstSpeed = False
-	if (steps - (accelDist * 2.0) < 0):
+#=============================
+	accelDist = distAccel(speed) # calculated distance to fully accel to speed
+	constDist = steps - (accelDist * 2.0) # calculated distance moving at constant speed
+	
+	if (constDist < 0):
 		accelDist = steps/2.0;
-		noConstSpeed = True #go straight from accel to decel
 	
 	decelDist = accelDist
-	
-	print "\nBegin move!"
-	print "---Acceleration: %d" %acceleration
-	print "---Speed:        %d" %speed
-	print "---Total steps:  %d" %totalSteps
-	print "---Complete acceleration requirement: %d steps" %distAccel(speed)
-	print "---Complete deceleration requirement: %d steps" %distAccel(speed)
-	print "---Ratio: (distAccel(speed)/total steps) =  %f" %(distAccel(speed) / steps)
 
-	if(float(steps)%2 == 1):
-		print "\nNOTE: Odd number of steps: adding 1 step to acceleration partition for compensation."
-		accelDist = accelDist + 1
+	if(float(steps)%2.0 == 1):
+		print "---Odd number of steps:"		
+		if constDist < 0:	
+			print "   ---No constant speed. distAccel++"			
+			constDist = 0 # go straight from accel to decel
+			accelDist = accelDist + 1
+		else:
+			constDist = steps - accelDist - decelDist # steps moved at constant speed
+	else:
+		constDist = steps - accelDist - decelDist # steps moved at constant speed
 	
-	constDist = steps - accelDist - decelDist # steps moved at constant speed
-
+	
 	#=============================
 	# Acelerate
+	t0 = time.time()
+	totalTime = 0.0
+	currSpeed = 0.0 # speed of step at stepCount & currTime	
 	print "\n1. Begin Acceleration for %d steps..." %accelDist
 	for currStep in range(0, int(accelDist)):
 		if totalTime == 0:
@@ -231,15 +241,17 @@ def stepClockwise_withAccel(steps, speed):
 		totalTime = totalTime + (1.0/currSpeed)
 	print "   ---Finished accelerating!"
 	
+
 	#=============================
 	# Constant speed	
-	print "2. Moving at constant speed for %d steps..." %constDist	
-	if noConstSpeed == False:
+	if constDist > 0:
+		print "2. Moving at constant speed for %d steps..." %constDist	
 		step_clockwise(constDist, speed)
 		print "   ---Finished moving at constant speed!"
 	else:
-		print "   ---NOTE: Did not achieve full speed at this acceleration rate." 
-	
+		print "2. Did not achieve full speed at this acceleration rate." 
+
+		
 	#=============================
 	# Decelerate
 	totalTime = 0
@@ -253,11 +265,95 @@ def stepClockwise_withAccel(steps, speed):
 		step_clockwise(1, currSpeed)
 		totalTime = totalTime + (1.0/currSpeed)
 	print "   ---Finished decelerating!"
+	
+	print "Run Time: %f seconds\n" % (time.time() - t0)
+#end method
 
+#=====================================================================================
+#=====================================================================================
+# Step CounterClockwise with Acceleration and Deceleration
+def stepCounterClockwise_withAccel(steps, speed):
+	if(steps < 0):
+		print "ERROR: steps argument cannot be negative!"
+		return
+	if(speed < 0):
+		print "ERROR: speed argument cannot be negative!"	
+		return
 
+	
+	print "Begin move!"
+	print "---Acceleration: %d" % acceleration
+	print "---Speed:        %d" % speed
+	print "---Total steps:  %d" % steps
+	print "---Total acceleration step requirement:  %d steps" % distAccel(speed)
+	print "---Total deceleration step requirement:  %d steps" % distAccel(speed)
+	print "---Ratio (distAccel(speed)/total steps): %f" % (distAccel(speed) / steps)
+	
 
+#=============================
+	accelDist = distAccel(speed) # calculated distance to fully accel to speed
+	constDist = steps - (accelDist * 2.0) # calculated distance moving at constant speed
+	
+	if (constDist < 0):
+		accelDist = steps/2.0;
+	
+	decelDist = accelDist
 
+	if(float(steps)%2.0 == 1):
+		print "---Odd number of steps:"		
+		if constDist < 0:	
+			print "   ---No constant speed. distAccel++"			
+			constDist = 0 # go straight from accel to decel
+			accelDist = accelDist + 1
+		else:
+			constDist = steps - accelDist - decelDist # steps moved at constant speed
+	else:
+		constDist = steps - accelDist - decelDist # steps moved at constant speed
+	
+	
+	#=============================
+	# Acelerate
+	t0 = time.time()
+	totalTime = 0.0
+	currSpeed = 0.0 # speed of step at stepCount & currTime	
+	print "\n1. Begin Acceleration for %d steps..." %accelDist
+	for currStep in range(0, int(accelDist)):
+		if totalTime == 0:
+			currSpeed = 25 #start speed
+		else:
+			currSpeed = (currStep / totalTime) + (acceleration * totalTime * 0.5)
+		#print "%d: %d" %(currStep,currSpeed)		
+		step_counter_clockwise(1, currSpeed)
+		totalTime = totalTime + (1.0/currSpeed)
+	print "   ---Finished accelerating!"
+	
 
+	#=============================
+	# Constant speed	
+	if constDist > 0:
+		print "2. Moving at constant speed for %d steps..." %constDist	
+		step_counter_clockwise(constDist, speed)
+		print "   ---Finished moving at constant speed!"
+	else:
+		print "2. Did not achieve full speed at this acceleration rate." 
+
+		
+	#=============================
+	# Decelerate
+	totalTime = 0
+	print "3. Begin Decelerating for %d steps..." %decelDist
+	for currStep in range(0, int(decelDist)):
+		if totalTime == 0:
+			currSpeed = currSpeed #start speed
+		else:
+			currSpeed = (currStep / totalTime) - (acceleration * totalTime * 0.5)
+		#print "%d: %d" %(currStep,currSpeed)		
+		step_counter_clockwise(1, currSpeed)
+		totalTime = totalTime + (1.0/currSpeed)
+	print "   ---Finished decelerating!"
+	
+	print "Run Time: %f seconds\n" % (time.time() - t0)
+#end method
 
 
 
