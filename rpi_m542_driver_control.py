@@ -369,7 +369,7 @@ def stepCounterClockwise_withAccel(steps, speed):
 
 
 # write to file the locations of the stepper in this test
-filename = "relativeStepperLocation.txt"
+filename = "./output/relativeStepperLocation.txt"
 print("   writing file: " + filename) #This file keeps track of the relative location of the stepper motor in this session.
 file1 = open(filename, 'w')
 file1.truncate()
