@@ -12,6 +12,7 @@
 # TODO: attach a hall sensor to the arm and a fixed location on the table. Call an initialization() method that scans the entire the table. When the hall sensor is triggered, carefully stop the arm and slowly back up until the hall sensors are lined up again. This location will be fixed and will be tooth 0. 
 
 # initialize() # TODO: write this method 
+#TODO: global variable moveCount might not be doing what it is supposed to do in trackLocation()
 
 import RPi.GPIO as GPIO
 import time
@@ -20,7 +21,8 @@ from sys import argv
 # global variables
 moveCount = -1 		# tracker number for movements
 location = 0  		# current location
-acceleration = 300 	# magnitude of linear acceleration
+acceleration = 10 	# magnitude of linear acceleration
+startSpeed = 10		# initial velocity to begin acceleration
 
 # GPIO pin assignments
 pulse_pin = 23
@@ -52,7 +54,7 @@ motorSteps = 400 # number of steps for 1 cycle of the motor
 pulleyTeeth = 40 # number of teeth on the pulley
 tableTeeth = 300 # number of teeth on the table gear
 stepsPerTooth = motorSteps / pulleyTeeth # = 10 steps
-tableSteps = tableTeeth * stepsPerTooth  # = 120000 steps
+tableSteps = tableTeeth * stepsPerTooth  # = 3000 steps
 motorCyclesPerArmCycle = 300/40          # = 7.5 motor cycles
 
 #===================================================================
@@ -233,7 +235,7 @@ def stepClockwise_withAccel(steps, speed):
 	print "\n1. Begin Acceleration for %d steps..." %accelDist
 	for currStep in range(0, int(accelDist)):
 		if totalTime == 0:
-			currSpeed = 25 #start speed
+			currSpeed = startSpeed #start speed to accelerate
 		else:
 			currSpeed = (currStep / totalTime) + (acceleration * totalTime * 0.5)
 		#print "%d: %d" %(currStep,currSpeed)		
@@ -258,10 +260,10 @@ def stepClockwise_withAccel(steps, speed):
 	print "3. Begin Decelerating for %d steps..." %decelDist
 	for currStep in range(0, int(decelDist)):
 		if totalTime == 0:
-			currSpeed = currSpeed #start speed
+			currSpeed = currSpeed #start speed to decelerate
 		else:
 			currSpeed = (currStep / totalTime) - (acceleration * totalTime * 0.5)
-		#print "%d: %d" %(currStep,currSpeed)		
+		print "%d: %d" %(currStep,currSpeed)		
 		step_clockwise(1, currSpeed)
 		totalTime = totalTime + (1.0/currSpeed)
 	print "   ---Finished decelerating!"
@@ -319,7 +321,7 @@ def stepCounterClockwise_withAccel(steps, speed):
 	print "\n1. Begin Acceleration for %d steps..." %accelDist
 	for currStep in range(0, int(accelDist)):
 		if totalTime == 0:
-			currSpeed = 25 #start speed
+			currSpeed = startSpeed #start speed to accelerate
 		else:
 			currSpeed = (currStep / totalTime) + (acceleration * totalTime * 0.5)
 		#print "%d: %d" %(currStep,currSpeed)		
@@ -344,7 +346,7 @@ def stepCounterClockwise_withAccel(steps, speed):
 	print "3. Begin Decelerating for %d steps..." %decelDist
 	for currStep in range(0, int(decelDist)):
 		if totalTime == 0:
-			currSpeed = currSpeed #start speed
+			currSpeed = currSpeed #start speed to decelerate
 		else:
 			currSpeed = (currStep / totalTime) - (acceleration * totalTime * 0.5)
 		#print "%d: %d" %(currStep,currSpeed)		
