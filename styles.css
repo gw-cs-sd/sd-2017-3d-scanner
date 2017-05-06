@@ -15,6 +15,9 @@ h2 {
 h3 {
 	font-family: "Cambria";
 	margin-bottom: 0px;
+	padding-bottom: 0px;
+	margin-before: 0;
+	margin-after: 0;
 }
 
 p {
